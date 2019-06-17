@@ -4680,26 +4680,6 @@ log__open_errorlogfile(int logfile_state, int locked)
         return LOG_UNABLE_TO_OPENFILE;
     }
 
-    /* make sure the logfile is owned by the localuser.  If one of the
-     * alternate ns-slapd modes, such as db2bak, tries to log an error
-     * at startup, it will create the logfile as root!
-     */
-    if ((rc = slapd_chown_if_not_owner(loginfo.log_error_file, pw->pw_uid, -1)) != 0) {
-        PR_snprintf(buffer, sizeof(buffer),
-                    "Failed to chown log file %s: error %d (%s); Exiting...",
-                    loginfo.log_error_file, errno, slapd_system_strerror(errno));
-        log__error_emergency(buffer, 1, locked);
-        if (!locked)
-            LOG_ERROR_UNLOCK_WRITE();
-        /* failed to write to the errors log.  should not continue. */
-        g_set_shutdown(SLAPI_SHUTDOWN_EXIT);
-        /*if I have an old log file -- I should log a message
-        ** that I can't open the new file. Let the caller worry
-        ** about logging message.
-        */
-        return LOG_UNABLE_TO_OPENFILE;
-    }
-
     loginfo.log_error_fdes = fp;
     if (logfile_state == LOGFILE_REOPENED) {
         /* we have all the information */

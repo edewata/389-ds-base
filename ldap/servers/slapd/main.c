@@ -348,23 +348,6 @@ fix_ownership(void)
     }
 
     pw = slapdFrontendConfig->localuserinfo;
-
-    /* config directory needs to be owned by the local user */
-    if (slapdFrontendConfig->configdir) {
-        chown_dir_files(slapdFrontendConfig->configdir, pw, PR_FALSE, PR_FALSE);
-    }
-    /* do access log file, if any */
-    if (slapdFrontendConfig->accesslog) {
-        chown_dir_files(slapdFrontendConfig->accesslog, pw, PR_TRUE, PR_TRUE);
-    }
-    /* do audit log file, if any */
-    if (slapdFrontendConfig->auditlog) {
-        chown_dir_files(slapdFrontendConfig->auditlog, pw, PR_TRUE, PR_TRUE);
-    }
-    /* do error log file, if any */
-    if (slapdFrontendConfig->errorlog) {
-        chown_dir_files(slapdFrontendConfig->errorlog, pw, PR_TRUE, PR_TRUE);
-    }
 }
 
 /* Changes identity to the named user
@@ -929,14 +912,6 @@ main(int argc, char **argv)
             slapi_log_err(SLAPI_LOG_ERR, "main", "Failed to init daemon\n");
             exit(1);
         }
-    }
-
-    /* Now, sockets are open, so we can safely change identity now */
-    return_value = main_setuid(slapdFrontendConfig->localuser);
-    if (0 != return_value) {
-        slapi_log_err(SLAPI_LOG_ERR, "main", "Failed to change user and group identity to that of %s\n",
-                      slapdFrontendConfig->localuser);
-        exit(1);
     }
 
     /*

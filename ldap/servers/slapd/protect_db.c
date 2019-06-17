@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
+#include <string.h>
 #include <sys/param.h> /* MAXPATHLEN */
 #include <dirent.h>
 #include <pwd.h>
@@ -72,7 +73,7 @@ grab_lockfile(void)
     /* We weren't able to get the lock.  Find out why. */
     if (errno != EEXIST) {
         /* Hmm, something happened that we weren't prepared to handle */
-        fprintf(stderr, ERROR_ACCESSING_LOCKFILE, lockfile);
+        fprintf(stderr, ERROR_ACCESSING_LOCKFILE, lockfile, strerror(errno));
         return -1;
     }
 
@@ -170,21 +171,6 @@ make_sure_dir_exists(char *dir)
         }
     }
 
-    /* Make sure it's owned by the correct user */
-    if (slapdFrontendConfig->localuser != NULL &&
-        slapdFrontendConfig->localuserinfo != NULL) {
-        pw = slapdFrontendConfig->localuserinfo;
-        if (chown(dir, pw->pw_uid, -1) == -1) {
-            if ((stat(dir, &stat_buffer) == 0) && (stat_buffer.st_uid != pw->pw_uid)) {
-                slapi_log_err(SLAPI_LOG_WARNING, "make_sure_dir_exists", CHOWN_WARNING, dir);
-                return 1;
-            } else {
-                slapi_log_err(SLAPI_LOG_ERR, "make_sure_dir_exists", STAT_ERROR, dir, errno);
-                return 1;
-            }
-        }
-    }
-
     return 0;
 }
 
@@ -208,17 +194,6 @@ add_this_process_to(char *dir_name)
         return;
     }
 
-    /* Make sure the owner is of the file is the user the server
-     * runs as. */
-    if (slapdFrontendConfig->localuser != NULL &&
-        slapdFrontendConfig->localuserinfo != NULL) {
-        pw = slapdFrontendConfig->localuserinfo;
-        if (chown(file_name, pw->pw_uid, -1) == -1) {
-            if ((stat(file_name, &stat_buffer) == 0) && (stat_buffer.st_uid != pw->pw_uid)) {
-                slapi_log_err(SLAPI_LOG_WARNING, "add_this_process_to", CHOWN_WARNING, file_name);
-            }
-        }
-    }
     PR_Close(prfd);
 }
 

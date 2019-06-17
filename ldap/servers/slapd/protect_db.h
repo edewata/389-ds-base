@@ -23,7 +23,7 @@ void remove_slapd_process(void);
  * string.
  */
 
-#define ERROR_ACCESSING_LOCKFILE "Error - Problem accessing the lockfile %s\n"
+#define ERROR_ACCESSING_LOCKFILE "Error - Problem accessing the lockfile %s (%s)\n"
 /* name of lockfile */
 
 #define ERROR_WRITING_LOCKFILE "Error - Problem writing the lockfile %s\n"
